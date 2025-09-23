@@ -181,4 +181,3 @@ with sidebar_col:
 
         st.markdown(f"#### {selected_title}")
         st.write(selected_text)
-
