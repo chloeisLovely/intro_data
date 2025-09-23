@@ -69,18 +69,19 @@ if 'selected_concept' not in st.session_state:
 st.markdown("""
 <style>
     /* 폰트 및 기본 스타일 */
-    .stApp {
-        background-color: #f4f4f2;
-    }
+    .stApp { background-color: #f4f4f2; }
     h1, h2, h3, h4, h5, h6 {
+        font-family: 'Noto Sans KR', sans-serif !important;
         font-weight: 900 !important;
         color: #44403c;
     }
-    /* 헤더 */
-    .st-emotion-cache-10trblm e1nzilvr1 {
-        text-align: center;
+    .st-emotion-cache-10trblm, .st-emotion-cache-1v0mbdj, p, .st-emotion-cache-1r4qj8v {
+        font-family: 'Noto Sans KR', sans-serif !important;
     }
-    /* 타임라인은 markdown으로 직접 구현 */
+    .stButton>button {
+        border-radius: 0.5rem;
+        border: 1px solid #d4d4d8;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -88,27 +89,19 @@ st.markdown("""
 # --- 헤더 ---
 st.title("데이터 탐정단 프로젝트")
 st.markdown("<p style='text-align: center; font-size: 1.25rem; color: #78716c;'>우리 학교를 1% 더 좋게 만들기 위한 12주간의 위대한 여정</p>", unsafe_allow_html=True)
-
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- 타임라인 네비게이션 (앵커 링크 사용) ---
-c1, c2, c3 = st.columns(3)
-with c1:
-    st.markdown("[<h3 style='text-align:center;'>1️⃣ 수사 착수 (1-3차시)</h3>](#1-1-3-)", unsafe_allow_html=True)
-with c2:
-    st.markdown("[<h3 style='text-align:center;'>2️⃣ 데이터 분석 (4-8차시)</h3>](#2-4-8-)", unsafe_allow_html=True)
-with c3:
-    st.markdown("[<h3 style='text-align:center;'>3️⃣ 최종 발표 (9-12차시)</h3>](#3-9-12-)", unsafe_allow_html=True)
+# --- 타임라인 네비게이션 ---
+# Streamlit은 직접 스크롤링 기능이 없으므로, 시각적 표현만 제공합니다.
+st.image("https://i.imgur.com/gY3pP2Z.png")
 
 st.markdown("---")
-
 
 # --- 메인 레이아웃 (콘텐츠 + 사이드바) ---
 main_col, sidebar_col = st.columns([2, 1])
 
 with main_col:
     # --- 1단계: 수사 착수 ---
-    st.markdown("<a name='1-1-3-'></a>", unsafe_allow_html=True)
     st.header("1단계: 수사 착수 (1-3차시)")
     for session in sessions['phase1']:
         with st.expander(f"**{session['title']}**"):
@@ -119,7 +112,6 @@ with main_col:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # --- 2단계: 데이터 분석 ---
-    st.markdown("<a name='2-4-8-'></a>", unsafe_allow_html=True)
     st.header("2단계: 데이터 분석 (4-8차시)")
     
     with st.container(border=True):
@@ -129,17 +121,23 @@ with main_col:
         filter_cols = st.columns(3)
         if filter_cols[0].button("전체 학년", use_container_width=True, type="primary" if st.session_state.active_filter == 'all' else "secondary"):
             st.session_state.active_filter = 'all'
+            st.rerun()
         if filter_cols[1].button("저학년", use_container_width=True, type="primary" if st.session_state.active_filter == 'low' else "secondary"):
             st.session_state.active_filter = 'low'
+            st.rerun()
         if filter_cols[2].button("고학년", use_container_width=True, type="primary" if st.session_state.active_filter == 'high' else "secondary"):
             st.session_state.active_filter = 'high'
+            st.rerun()
             
-        # Matplotlib 차트 생성
-        fig, ax = plt.subplots()
-        ax.barh(food_data['labels'], food_data[st.session_state.active_filter], color='rgba(234, 88, 12, 0.6)')
+        # Matplotlib 차트 생성 (오류 해결 버전)
+        fig, ax = plt.subplots(figsize=(10, 6))
+        # RGBA 튜플 형태로 색상 지정
+        bar_colors = [(234/255, 88/255, 12/255, 0.6)]
+        ax.barh(food_data['labels'], food_data[st.session_state.active_filter], color=bar_colors)
         ax.invert_yaxis()
         ax.set_xlabel('학생 수 (명)')
-        ax.set_title('급식 메뉴 선호도', fontweight='bold')
+        ax.set_title('급식 메뉴 선호도', fontweight='bold', fontsize=16)
+        ax.grid(axis='x', linestyle='--', alpha=0.6)
         st.pyplot(fig)
         
         st.info(f"**💡 분석 인사이트:** {insight_texts[st.session_state.active_filter]}")
@@ -153,7 +151,6 @@ with main_col:
     st.markdown("<br>", unsafe_allow_html=True)
     
     # --- 3단계: 최종 발표 ---
-    st.markdown("<a name='3-9-12-'></a>", unsafe_allow_html=True)
     st.header("3단계: 최종 발표 (9-12차시)")
     for session in sessions['phase3']:
         with st.expander(f"**{session['title']}**"):
@@ -167,12 +164,12 @@ with sidebar_col:
     with st.container(border=True):
         st.subheader("🔑 핵심 개념")
         
-        # 버튼들을 여러 줄로 나누어 배치
         cols = st.columns(2)
         for i, key in enumerate(concept_keys):
             col = cols[i % 2]
             if col.button(key, use_container_width=True, type="primary" if st.session_state.selected_concept == key else "secondary"):
                 st.session_state.selected_concept = key
+                st.rerun()
         
         st.markdown("---")
 
@@ -181,3 +178,4 @@ with sidebar_col:
 
         st.markdown(f"#### {selected_title}")
         st.write(selected_text)
+
