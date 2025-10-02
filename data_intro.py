@@ -93,7 +93,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 # --- 타임라인 네비게이션 ---
 # Streamlit은 직접 스크롤링 기능이 없으므로, 시각적 표현만 제공합니다.
-st.image("https://i.imgur.com/gY3pP2Z.png")
+
 
 st.markdown("---")
 
